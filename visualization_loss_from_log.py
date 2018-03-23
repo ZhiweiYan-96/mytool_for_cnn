@@ -56,13 +56,14 @@ if __name__=="__main__":
 	print 'loss_min_ind:'
 	print loss_min_ind
 	m_box__loss_min_ind=np.argmin(m_box__loss)
-	detection_eval_max_ind=np.argmax(detection_eval)
+	if (len(detection_eval)>0):
+		detection_eval_max_ind=np.argmax(detection_eval)
 	
 
 	print len(iterations)
 	print len(loss)
 	print len(mbox_loss)
-	plt.subplot(131)
+	plt.subplot(121)
 	plt.plot(iterations,loss,'b',label='loss')
 	plt.xlabel('iterations',fontsize=15)
 	plt.ylabel('loss',fontsize=15)
@@ -78,13 +79,14 @@ if __name__=="__main__":
 	plt.title('iteration vs m_box__loss')
 	plt.legend()
 	'''
-	plt.subplot(133)
-	plt.annotate(s='max mAP={},{}th test'.format(np.max(detection_eval),detection_eval_max_ind),xy=( test_index[detection_eval_max_ind],detection_eval[detection_eval_max_ind]),xytext=( test_index[detection_eval_max_ind]-3,detection_eval[detection_eval_max_ind]-5),arrowprops=dict( facecolor="black",arrowstyle="->" ) )
-	plt.plot(test_index,detection_eval,'b',label='detection_eval(mAP)')
-	plt.xlabel('nth test',fontsize=15)
-	plt.ylabel('detection_eval(mAP)',fontsize=15)
-	plt.title(' test vs detection_eval')
-	plt.legend()
+	if (len(detection_eval)>0):
+		plt.subplot(122)
+		plt.annotate(s='max mAP={},{}th test'.format(np.max(detection_eval),detection_eval_max_ind),xy=( test_index[detection_eval_max_ind],detection_eval[detection_eval_max_ind]),xytext=( test_index[detection_eval_max_ind]-3,detection_eval[detection_eval_max_ind]-5),arrowprops=dict( facecolor="black",arrowstyle="->" ) )
+		plt.plot(test_index,detection_eval,'b',label='detection_eval(mAP)')
+		plt.xlabel('nth test',fontsize=15)
+		plt.ylabel('detection_eval(mAP)',fontsize=15)
+		plt.title(' test vs detection_eval')
+		plt.legend()
 	plt.show()
 
 	
