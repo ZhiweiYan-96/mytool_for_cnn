@@ -136,3 +136,56 @@ print ("keys[1:5]"+str(keys[1:5]))
 print labels[1:5]
 print keys[1:5]
 '''
+# todo
+mbox_source_layers = ['conv4_3', 'fc7', 'conv6_2', 'conv7_2', 'conv8_2', 'conv9_2']
+label_map_file = "data/VOC0712/labelmap_voc.prototxt"
+batch_size=1
+test_prototxt=''
+solver_prototxt=''
+test_transform_param = {
+        'mean_value': [104, 117, 123],
+        'resize_param': {
+                'prob': 1,
+                'resize_mode': P.Resize.WARP,
+                'height': resize_height,
+                'width': resize_width,
+                'interp_mode': [P.Resize.LINEAR],
+                },
+        }
+
+net=caffe.Net(test_prototxt,caffe.TEST)
+solver=caffe.SGDSolver(solver_prototxt)
+solver.test_net[0].forward()
+
+'''
+net.data,net.label=CreateAnnotatedDataLayer(lmdb_path,batch_size=batch_size,train=False,output_label=True,label_map_file=label_map_file,transform_param=test_transform_param)
+VGGNetBody(net, from_layer='data', fully_conv=True, reduced=True, dilated=True,
+    dropout=False)
+    
+mbox_layers = CreateMultiBoxHead(net, data_layer='data', from_layers=mbox_source_layers,
+        use_batchnorm=use_batchnorm, min_sizes=min_sizes, max_sizes=max_sizes,
+        aspect_ratios=aspect_ratios, steps=steps, normalizations=normalizations,
+        num_classes=num_classes, share_location=share_location, flip=flip, clip=clip,
+        prior_variance=prior_variance, kernel_size=3, pad=1, lr_mult=lr_mult)
+
+conf_name = "mbox_conf"
+if multibox_loss_param["conf_loss_type"] == P.MultiBoxLoss.SOFTMAX:
+  reshape_name = "{}_reshape".format(conf_name)
+  net[reshape_name] = L.Reshape(net[conf_name], shape=dict(dim=[0, -1, num_classes]))
+  softmax_name = "{}_softmax".format(conf_name)
+  net[softmax_name] = L.Softmax(net[reshape_name], axis=2)
+  flatten_name = "{}_flatten".format(conf_name)
+  net[flatten_name] = L.Flatten(net[softmax_name], axis=1)
+  mbox_layers[1] = net[flatten_name]
+elif multibox_loss_param["conf_loss_type"] == P.MultiBoxLoss.LOGISTIC:
+  sigmoid_name = "{}_sigmoid".format(conf_name)
+  net[sigmoid_name] = L.Sigmoid(net[conf_name])
+  mbox_layers[1] = net[sigmoid_name]
+
+net.detection_out = L.DetectionOutput(*mbox_layers,
+    detection_output_param=det_out_param,
+    include=dict(phase=caffe_pb2.Phase.Value('TEST')))
+net.detection_eval = L.DetectionEvaluate(net.detection_out, net.label,
+    detection_evaluate_param=det_eval_param,
+    include=dict(phase=caffe_pb2.Phase.Value('TEST')))
+'''
