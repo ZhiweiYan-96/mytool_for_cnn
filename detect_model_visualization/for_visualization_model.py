@@ -1,12 +1,15 @@
+from __future__ import print_function
 import sys
 import cv2
-import glbo
 import numpy
 import argparse
+import lmdb
+sys.path.append('/home/yanzhiwei/caffe/python/')
+import caffe
 from matplotlib import pyplot
 
 class LMDB:
-	def __init__(self,lmdb_path):
+    def __init__(self,lmdb_path):
 	'''
 		Constructor, given lmdb path.
 
@@ -17,18 +20,17 @@ class LMDB:
 	self._write_pointer=0
 	'''(int) Pointer for writing and appending'''
 
-	def read(self,key = ''):
-		'''
-			Reading s single element or the wholse LMDB depending on wehter key is specified.Essentially a prox for
-			:func 'lmdb.LMDB.read_single'
-			and : func 'lmdb.LMDB.read_all'
+    def read(self,key = ''):
+	'''
+	Reading s single element or the wholse LMDB depending on wehter key is specified.Essentially a prox for
+	:func 'lmdb.LMDB.read_single'
+	and : func 'lmdb.LMDB.read_all'
 
-			:param key: key s 8-digit string of the entyr to read
-			:type key ： string
-			:return :data and labels from the LMDB as associate dictionaries,where  the key as string is the dictornary key and the value the numpy.ndarray
-			for the data and the label for the labels
-			:rtype ( {string:numpy.ndarray},{string:float} )
-		'''
+	:param key: key s 8-digit string of the entyr to read
+	:type key : string
+	:return :data and labels from the LMDB as associate dictionaries,where  the key as string is the dictornary key and the value the numpy.ndarray for the data and the label for the labels
+	:rtype ( {string:numpy.ndarray},{string:float} )
+	'''
 
         if not key:
             return self.read_all()
@@ -36,19 +38,19 @@ class LMDB:
             return self.read_single(key)
 
     def read_single(self,key):
-		image=False
-		label=False
-		env=lmdb.open(self._lmdb_path,readonly=True)
+	image=False
+	label=False
+	env=lmdb.open(self._lmdb_path,readonly=True)
 
-		with evn.begin() as transaction:
-			raw=transaction.get(key)
-			datum=caffe.proto.caffe_pb2.Datum()
-			datum.ParseFromString(raw)
+	with evn.begin() as transaction:
+		raw=transaction.get(key)
+		datum=caffe.proto.caffe_pb2.Datum()
+		datum.ParseFromString(raw)
 
-			label=datum.label
-			if datum.data:
-				image=numpy.fromstring(datum.data,dtype=numpy.uint8).reshape(datum.channels,datum.height,datum.width).transpose(1,2,0)
-		return image,label,key
+		label=datum.label
+		if datum.data:
+			image=numpy.fromstring(datum.data,dtype=numpy.uint8).reshape(datum.channels,datum.height,datum.width).transpose(1,2,0)
+	return image,label,key
 
     def read_all(self):
         '''
@@ -61,9 +63,9 @@ class LMDB:
         images=[]
         labels=[]
         keys=[]
-        env=lmdb.open(self._lmdb_path,readoly=True)
+        env=lmdb.open(self._lmdb_path,readonly=True)
 
-        withe env.begin() as transaction:
+        with env.begin() as transaction:
             cursor=transaction.cursor()
 
             for key, raw in cursor:
@@ -75,7 +77,7 @@ class LMDB:
                 if datum.data:
                     image=numpy.fromstring(datum.data,dtype=numpy.uint8).reshape(datum.chanels,datum.height,datum.width).transpose(1,2,0)
                 else :
-                    image=numpy.array(datum.flow_data).astype(numpy.float),reshape(dataum.channels,datum.height,datum.widht).transpose(1,2,0)
+                    image=numpy.array(datum.float_data).astype(numpy.float).reshape(datum.channels,datum.height,datum.width).transpose(1,2,0)
 
                 images.append(image)
                 labels.append(label)
@@ -101,7 +103,7 @@ class LMDB:
         :param n: number of keys to get ,0 to get all keys
         :type n : int
         :return : list of keys
-        ：rtype: [string ]
+        :rtype: [string ]
         '''
         keys=[]
         env=lmdb.open(self._lmdb_path,readonly=True)
@@ -121,10 +123,16 @@ class LMDB:
 
 
 
-lmdb_path='/home/yanzhiwei/data/VOCdevkit/VOC/lmdb'
+lmdb_path='/home/yanzhiwei/data/VOCdevkit/VOC0712/lmdb/VOC0712_test_lmdb'
 
 db=LMDB(lmdb_path)
-print db.keys(n=5)
-[imges,label,keys]=db.read_all()
+#print db.keys(n=5)
+[imges,labels,keys]=db.read_all()
+print ("len(labels):{}".format(len(labels)))
+print ("labels[1:5]"+str(labels[1:5]))
+print ("len(keys):{}".format(len(keys)))
+print ("keys[1:5]"+str(keys[1:5]))
+'''
 print labels[1:5]
 print keys[1:5]
+'''
