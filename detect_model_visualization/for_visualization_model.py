@@ -138,10 +138,12 @@ print keys[1:5]
 '''
 # todo
 mbox_source_layers = ['conv4_3', 'fc7', 'conv6_2', 'conv7_2', 'conv8_2', 'conv9_2']
-label_map_file = "data/VOC0712/labelmap_voc.prototxt"
+label_map_file = "/home/yanzhiwei/caffe/data/VOC0712/labelmap_voc.prototxt"
+weight_file="/home/yanzhiwei/caffe/models/SSD_AUTHOR_MODEL/VGG_VOC0712_SSD_300x300_iter_120000.caffemodel"
 batch_size=1
-test_prototxt=''
-solver_prototxt=''
+test_prototxt='test.prototxt'
+solver_prototxt='solver.prototxt'
+'''
 test_transform_param = {
         'mean_value': [104, 117, 123],
         'resize_param': {
@@ -152,9 +154,10 @@ test_transform_param = {
                 'interp_mode': [P.Resize.LINEAR],
                 },
         }
+'''
 
-net=caffe.Net(test_prototxt,caffe.TEST)
-solver=caffe.SGDSolver(solver_prototxt)
+net=caffe.Net(test_prototxt,weight_file,caffe.TEST)
+solver=caffe.get_solver(solver_prototxt)
 solver.test_net[0].forward()
 
 '''
