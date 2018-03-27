@@ -118,6 +118,22 @@ class LMDB:
                     break;
                 keys.append(key)
                 i+=1
+    def read_annotation(self):
+        env=lmdb.open(self._lmdb_pah,reanonly=True)
+        with env.begin() as transaction:
+            curosr=transaction.cursr()
+            for key,raw in cursor:
+                annotateddatum=caffe.proto.caffe_pb2.annotateddatum()
+                annotateddatum.ParseFromString(raw)
+
+                datum=annotateddatum.datum()
+                annotationgroup=annotatum.annotation_group
+
+                if(datum):
+                    print('datum is exist')
+                if(annotationgroup):
+                    print('annotationgrou exists')
+
 
         return keys
 
@@ -164,7 +180,7 @@ solver.test_net[0].forward()
 net.data,net.label=CreateAnnotatedDataLayer(lmdb_path,batch_size=batch_size,train=False,output_label=True,label_map_file=label_map_file,transform_param=test_transform_param)
 VGGNetBody(net, from_layer='data', fully_conv=True, reduced=True, dilated=True,
     dropout=False)
-    
+
 mbox_layers = CreateMultiBoxHead(net, data_layer='data', from_layers=mbox_source_layers,
         use_batchnorm=use_batchnorm, min_sizes=min_sizes, max_sizes=max_sizes,
         aspect_ratios=aspect_ratios, steps=steps, normalizations=normalizations,
