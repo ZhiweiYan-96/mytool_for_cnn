@@ -119,23 +119,33 @@ class LMDB:
                 keys.append(key)
                 i+=1
     def read_annotation(self):
-        env=lmdb.open(self._lmdb_pah,reanonly=True)
+        env=lmdb.open(self._lmdb_path,readonly=True)
+	keys=[]
+	datums=[]
+	annotations=[]
         with env.begin() as transaction:
-            curosr=transaction.cursr()
+            cursor=transaction.cursor()
             for key,raw in cursor:
-                annotateddatum=caffe.proto.caffe_pb2.annotateddatum()
+                annotateddatum=caffe.proto.caffe_pb2.AnnotatedDatum()
                 annotateddatum.ParseFromString(raw)
 
-                datum=annotateddatum.datum()
-                annotationgroup=annotatum.annotation_group
-
+                datum=annotateddatum.datum
+                annotationgroup=annotateddatum.annotation_group
+		
+		keys.append(key)
+		datums.append(datum)
+		annotations.append(annotationgroup)
+		'''
                 if(datum):
-                    print('datum is exist')
+                    #print('datum is exist')
+		    #print(dir(datum))
                 if(annotationgroup):
-                    print('annotationgrou exists')
+                    #print('annotationgrou exists')
+		    #print(len(annotationgroup))
+		'''
 
 
-        return keys
+        return keys,datums,annotations
 
 
 
@@ -143,11 +153,14 @@ lmdb_path='/home/yanzhiwei/data/VOCdevkit/VOC0712/lmdb/VOC0712_test_lmdb'
 
 db=LMDB(lmdb_path)
 #print db.keys(n=5)
-[imges,labels,keys]=db.read_all()
-print ("len(labels):{}".format(len(labels)))
-print ("labels[1:5]"+str(labels[1:5]))
+#[imges,labels,keys]=db.read_all()
+(keys,datums,annotations)=db.read_annotation()
+db.read_annotation()
 print ("len(keys):{}".format(len(keys)))
-print ("keys[1:5]"+str(keys[1:5]))
+#print ("labels[1:50]"+str(labels[1:50]))
+print ("len(datums):{}".format(len(datums)))
+print ("len(annotaions)"+str(len(annotations)))
+print ( dir(annotations[1][0]) )
 '''
 print labels[1:5]
 print keys[1:5]
@@ -172,9 +185,9 @@ test_transform_param = {
         }
 '''
 
-net=caffe.Net(test_prototxt,weight_file,caffe.TEST)
-solver=caffe.get_solver(solver_prototxt)
-solver.test_net[0].forward()
+#net=caffe.Net(test_prototxt,weight_file,caffe.TEST)
+#solver=caffe.get_solver(solver_prototxt)
+#solver.test_net[0].forward()
 
 '''
 net.data,net.label=CreateAnnotatedDataLayer(lmdb_path,batch_size=batch_size,train=False,output_label=True,label_map_file=label_map_file,transform_param=test_transform_param)
