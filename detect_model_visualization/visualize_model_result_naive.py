@@ -87,7 +87,7 @@ def showGTBox(image_file,objects):
     ax=plt.gca()
     res_name=os.path.splitext(image_file)[0]+"_result.png"
     plt.savefig(res_name)
-    plt.show()
+    #plt.show()
 
 
 
@@ -163,7 +163,7 @@ class CaffeDetection:
             result.append([xmin, ymin, xmax, ymax, label, score, label_name])
         return result
 
-def main(gpu_id,model_def,model_wights,image_resize,labelmap_file):
+def main(gpu_id,image_file,model_def,model_wights,image_resize,labelmap_file):
     detection=CaffeDetection(gpu_id,model_def,model_weights,image_resize,labelmap_file)
     result=detection.detect(image_file)
     print result
@@ -188,13 +188,19 @@ def main(gpu_id,model_def,model_wights,image_resize,labelmap_file):
 #    file_name=str(key).zfill(6)
 #    objects=parse_a_file(file_name+'.xml')
 if __name__=='__main__':
-    image_file='000001.jpg'
+    #image_file='000001.jpg'
     model_def='deploy _ssd_up.prototxt'
     image_resize=300
     label_map_file="./labelmap_voc.prototxt"
     model_weights='VGG_VOC0712_upSSD_up300x300_iter_80000.caffemodel'
-    main(1,model_def,model_weights,image_resize,label_map_file)
-    objects=parse_a_file('000001.xml')
-    showGTBox(image_file,objects)
+    for key in range(1,24):
+        xml_file=str(key).zfill(6)
+        image_file=xml_file+'.jpg'
+        objects=parse_a_file(xml_file+'.xml')
+        main(1,image_file,model_def,model_weights,image_resize,label_map_file)
+        showGTBox(image_file,objects)
+
+
+
 
     #showGTBox(image_file,objects)
