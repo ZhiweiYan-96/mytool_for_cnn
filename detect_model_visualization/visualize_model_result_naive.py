@@ -76,16 +76,19 @@ def showGTBox(image_file,objects):
     plt.savefig("gt.jpg",bbox_inches="tight")
     plt.show()
     '''
-    plt.subplot(121)
+    plt.subplot(131)
     plt.imshow(img)
-    plt.subplot(122)
-    img1=io.imread('result.jpg')
+    plt.subplot(132)
+    img1=io.imread('result1.jpg')
     #img=img.resize()
 #    plt.clf()
     plt.imshow(img1)
-    plt.axis('off')
+    plt.subplot(1,3,3)
+    img2=io.imread('result2.jpg')
+    plt.imshow(img2)
+    plt.axis('on')
     ax=plt.gca()
-    res_name=os.path.splitext(image_file)[0]+"_result.png"
+    res_name="result/"+os.path.splitext(image_file)[0]+"_result.png"
     plt.savefig(res_name)
     #plt.show()
 
@@ -163,7 +166,7 @@ class CaffeDetection:
             result.append([xmin, ymin, xmax, ymax, label, score, label_name])
         return result
 
-def main(gpu_id,image_file,model_def,model_wights,image_resize,labelmap_file):
+def main(gpu_id,image_file,model_def,model_wights,image_resize,labelmap_file,output_name):
     detection=CaffeDetection(gpu_id,model_def,model_weights,image_resize,labelmap_file)
     result=detection.detect(image_file)
     print result
@@ -182,22 +185,27 @@ def main(gpu_id,image_file,model_def,model_wights,image_resize,labelmap_file):
         print item
         print [xmin,ymin,xmax,ymax]
         print [xmin,ymin],item[-1]
-    img.save("result.jpg")
+    img.save(output_name)
         #k=1
 #for key in range(1,9964):
 #    file_name=str(key).zfill(6)
 #    objects=parse_a_file(file_name+'.xml')
 if __name__=='__main__':
     #image_file='000001.jpg'
-    model_def='deploy _ssd_up.prototxt'
+    ssd_def="ssd_deploy.prototxt"
+    #model_def='deploy _ssd_up.prototxt'
+    ssd_up_def="ssd_up_deploy.prototxt"
     image_resize=300
     label_map_file="./labelmap_voc.prototxt"
-    model_weights='VGG_VOC0712_upSSD_up300x300_iter_80000.caffemodel'
+    ssd_model_weights='ssd_12000.caffemodel'
+    ssd_up_model_weights="ssd_up_80000.caffemodel"
     for key in range(1,24):
         xml_file=str(key).zfill(6)
         image_file=xml_file+'.jpg'
         objects=parse_a_file(xml_file+'.xml')
-        main(1,image_file,model_def,model_weights,image_resize,label_map_file)
+        #main(1,image_file,model_def,model_weights,image_resize,label_map_file)
+        main(1,image_file,ssd_def,ssd_model_weights,image_resize,label_map_file,'result1.jpg')
+        main(2,image_file,ssd_up_def,ssd_up_model_weights,image_resize,label_map_file,'result2.jpg')
         showGTBox(image_file,objects)
 
 
