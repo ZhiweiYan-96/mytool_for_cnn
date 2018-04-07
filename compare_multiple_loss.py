@@ -72,7 +72,7 @@ if __name__=="__main__":
     plt.xlabel('iterations',fontsize=15)
     plt.ylabel('loss',fontsize=15)
     for i in range(0,len(iterations)):
-        plt.plot( iterations[i],losses[i], label=filenames[i]+'loss'  )
+        plt.plot( iterations[i],losses[i], label=filenames[i]+' loss'  )
         #plt.xlabel('iterations,fontsize=')
     plt.title('iteration vs loss')
     plt.legend()
