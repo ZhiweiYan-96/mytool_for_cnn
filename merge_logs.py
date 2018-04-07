@@ -49,6 +49,17 @@ if __name__ == "__main__":
     for name in sys.argv:
         if name!= sys.argv[0]:
             file_names.append(name)
+    if len(sys.argv)==2:
+        name=sys.argv[1]
+        content=readContent(name)
+        (iterations_total,loss_total,mbox_loss,detection_eval)=get_information(content)
+        f=open('total_log.txt','w')
+        for i in range( 0, len(iterations_total) ):
+            f.write( 'iterations:'+iterations_total[i].astype(np.str)+' '+ 'loss:'+ loss_total[i].astype(np.str)+'\n' )
+        plt.plot(iterations_total,loss_total)
+        plt.show()
+        sys.exit(0)
+
 
     iterations=[]
     losses=[]
