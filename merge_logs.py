@@ -57,7 +57,7 @@ if __name__ == "__main__":
         for i in range( 0, len(iterations_total) ):
             f.write( 'iterations:'+iterations_total[i].astype(np.str)+' '+ 'loss:'+ loss_total[i].astype(np.str)+'\n' )
         plt.plot(iterations_total,loss_total)
-        plt.show()
+        #plt.show()
         sys.exit(0)
 
 
