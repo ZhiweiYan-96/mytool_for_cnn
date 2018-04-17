@@ -62,7 +62,8 @@ def showGTBox(image_file,objects):
         ymax=object.ymax_
         draw.rectangle([xmin,ymin,xmax,ymax],outline=(0,0,255))
         draw.text([xmin,ymin],name,(0,255,0))
-    img.save('gt.jpg')
+    ground_output='groundtruth_visual/'+image_file
+    img.save(ground_output)
     '''
     plt.clf()
     plt.imshow(img)
@@ -75,7 +76,7 @@ def showGTBox(image_file,objects):
         ax.text(object.xmin_,object.ymin_,display_text,color='r')
     plt.savefig("gt.jpg",bbox_inches="tight")
     plt.show()
-    '''
+
     plt.subplot(131)
     plt.imshow(img)
     plt.subplot(132)
@@ -91,6 +92,7 @@ def showGTBox(image_file,objects):
     res_name="result/"+os.path.splitext(image_file)[0]+"_result.png"
     plt.savefig(res_name)
     #plt.show()
+    '''
 
 
 
@@ -204,8 +206,10 @@ if __name__=='__main__':
         image_file=xml_file+'.jpg'
         objects=parse_a_file(xml_file+'.xml')
         #main(1,image_file,model_def,model_weights,image_resize,label_map_file)
-        main(1,image_file,ssd_def,ssd_model_weights,image_resize,label_map_file,'result1.jpg')
-        main(2,image_file,ssd_up_def,ssd_up_model_weights,image_resize,label_map_file,'result2.jpg')
+        ssd_output='ssd_visual/'+xml_file+'_result.jpg'
+        ssd_up_output='ssd_up_visual/'+xml_file+'_result.jpg'
+        main(1,image_file,ssd_def,ssd_model_weights,image_resize,label_map_file,ssd_output)
+        main(2,image_file,ssd_up_def,ssd_up_model_weights,image_resize,label_map_file,ssd_up_output)
         showGTBox(image_file,objects)
 
 
