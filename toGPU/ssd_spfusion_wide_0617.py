@@ -47,20 +47,20 @@ class SSD_SPFusion_Wider(nn.Module):
 
         #extra way
         # this layer is used to downsample and pooling
-        self.out_pool=nn.Conv2d(256,256,kernel_size=3,stride=2,padding=1)
+        #self.out_pool=nn.Conv2d(256,256,kernel_size=3,stride=2,padding=1)
         #An Inception sturcture for fusion
             #branch1x1
-        self.inc_branch1x1=nn.Conv2d(256,64,kernel_size=1)
+        #self.inc_branch1x1=nn.Conv2d(256,64,kernel_size=1)
             #branch5x5
-        self.inc_branch5x5_1=nn.Conv2d(256,48,kernel_size=1)
-        self.inc_branch5x5_2=nn.Conv2d(48,64,kernel_size=5,padding=2)
+        #self.inc_branch5x5_1=nn.Conv2d(256,48,kernel_size=1)
+        #self.inc_branch5x5_2=nn.Conv2d(48,64,kernel_size=5,padding=2)
             #erase branch3x3
             #pool branch
-        self.inc_branch_pool=nn.Conv2d(256,128,kernel_size=1)
+        #self.inc_branch_pool=nn.Conv2d(256,128,kernel_size=1)
 
         #self.fusion_conv=nn.Conv2d(768,512,kernel_size=1,stride=1)
-        self.dim_reduction = nn.Conv2d( 512, 256, kernel_size=1)
-        self.SELayer1 = SELayer( 512 , 16  )
+        #self.dim_reduction = nn.Conv2d( 512, 256, kernel_size=1)
+        self.SELayer1 = SELayer( 512)
         '''
         inception v1 forward
             branch1x1=self.branch1x1(x)
@@ -104,48 +104,13 @@ class SSD_SPFusion_Wider(nn.Module):
             x = self.vgg[k](x)
             if k==15:
                 relu3_3=x
-        #index for relu4_3 ->22
-        #index for relu3_3 ->15
-        # extra way is for spatial information
-        #extra= self.out_conv4_0(self.out_pool(relu3_3))
-        extra=F.relu( self.out_pool( relu3_3 ) )
-        #branch 1x1x64
-        extra1x1=F.relu( self.inc_branch1x1( extra ) )
-        #branch 5x5x64
-        extra5x5=F.relu( self.inc_branch5x5_1( extra ) )
-        extra5x5=F.relu( self.inc_branch5x5_2( extra5x5 ) )
-        #branch poolx128
-        extra_pool=F.avg_pool2d(extra,kernel_size=3,stride=1,padding=1 )
-        extra_pool=self.inc_branch_pool( extra_pool)
-        #inception output size: 256x38x38
 
-        #x is 512x38x38
-        #Firstly, conduction dimensionality reduction on conv4_3,
-        #Secondly, concat all feature maps and send to a SE Layers
-        #dimensionality reduced  to 256x38x38
-        x = self.dim_reduction( x )
-        # inception-lise sturcture generates 256x38x38 features
-        # after conatentation, output is 38x38x512
-        #send to SE layer
-        pred1=torch.cat( [ extra1x1, extra5x5, extra_pool,x ],1  )
 
+        #apply SE layer on conv4_3
+        #pred1=torch.cat( [ extra1x1, extra5x5, extra_pool,x ],1  )
+        pred1=x
         pred1 = self.SELayer1( pred1 )
 
-        #pred1=F.relu( self.fusion_conv( pred1 ))
-        '''
-        extra1=F.relu(  self.out_conv4_1(extra) )
-        extra2=F.relu( self.out_conv4_2(extra) )
-        extra3=F.relu( self.out_conv4_3(extra) )
-        '''
-        #extra=F.relu( self.out_conv4_1(extra) )
-        #extra=F.relu( self.out_conv4_2(extra) )
-        #extra=F.relu( self.out_conv4_3(extra) )
-        #print('extra\n'+str(extra.shape))
-        #print('x\n'+str(x.shape))
-        #pred1=torch.cat([extra1,extra2,extra3,x],1)
-        #pred1=F.relu(self.concat_conv(pred1))
-
-        #all following layer training agian
         x=pred1
 
 
