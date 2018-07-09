@@ -46,16 +46,24 @@ class SSD(nn.Module):
         #self.down_conv3_1 = nn.Conv2d(256,512,stride=1,kernel_size=1)
         self.down_conv3_1 = nn.Conv2d(256,512,stride=1,kernel_size=1)
         self.down_conv3_1_conv = nn.Conv2d(512,512,stride=1,kernel_size=3,padding=1)
+        self.batch_norm0 = nn.BatchNorm2d(512)
 
         self.down_conv4_1 = nn.Conv2d(512,1024,stride=1,kernel_size=1)
         self.down_conv4_1_conv = nn.Conv2d(1024,1024,stride=1,kernel_size=3,padding=1)
         self.up_conv6_2 = nn.ConvTranspose2d(512,1024,kernel_size=3,stride=2,padding=1)
         self.up_conv6_2_conv = nn.Conv2d(1024,1024,kernel_size=3,stride=1,padding=1)
+        self.batch_norm1 = nn.BatchNorm2d(1024)
 
         self.down_fc7 = nn.Conv2d(1024,512,stride=1,kernel_size=1,padding=0)
         self.down_fc7_conv = nn.Conv2d(512,512,stride=1,kernel_size=3,padding=1)
         self.up_conv7_2 = nn.ConvTranspose2d(256,512,stride=2,kernel_size=2,padding=0)
         self.up_conv7_2_conv = nn.Conv2d(512,512,kernel_size=3,stride=1,padding=1)
+        self.batch_norm2 = nn.BatchNorm2d(512)
+
+        self.last_three_bn=[]
+        for i in range(0,2):
+            self.last_three_bn.append(nn.BatchNorm2d(256))
+
 
         self.loc = nn.ModuleList(head[0])
         self.conf = nn.ModuleList(head[1])
@@ -114,7 +122,8 @@ class SSD(nn.Module):
         conv3_1_down =F.relu(self.down_conv3_1( conv3_1_down ))
         conv3_1_down = F.relu(self.down_conv3_1_conv( conv3_1_down))
         conv4_3= conv4_3 + fc7_up + conv3_1_down
-        conv4_3_1 = self.L2Norm( conv4_3 )
+        #conv4_3_1 = self.L2Norm( conv4_3 )
+        conv4_3_1 = self.batch_norm0(conv4_3)
         sources.append(conv4_3_1)
 
 
@@ -141,21 +150,25 @@ class SSD(nn.Module):
         conv6_2_up = self.up_conv6_2( conv6_2 )
         conv6_2_up = self.up_conv6_2_conv(conv6_2_up)
         fc7_1 = fc7 + conv4_1_down + conv6_2_up
+        fc7_1 = self.batch_norm1(fc7_1)
+
         sources.append( fc7_1 )
         #pred_last_4 [1]->conv6_2 [3]->conv7_2
         #merge conv6_2
         fc7_down = F.max_pool2d(fc7,kernel_size=2,stride=2,ceil_mode=True)
         fc7_down = F.relu( self.down_fc7( fc7_down ))
         fc7_down = F.relu( self.down_fc7_conv( fc7_down ))
-        print('fc7_down size:'+str(fc7_down.shape))
+       # print('fc7_down size:'+str(fc7_down.shape))
         conv7_2_up = self.up_conv7_2( conv7_2 )
         conv7_2_up = self.up_conv7_2_conv( conv7_2_up)
-        print('conv7_2_up size:'+str(conv7_2_up.shape))
-        print('conv6_2 size:'+str(conv6_2.shape))
+        #print('conv7_2_up size:'+str(conv7_2_up.shape))
+       # print('conv6_2 size:'+str(conv6_2.shape))
         conv6_2_1 = conv6_2 + fc7_down + conv7_2_up
+        conv6_2_1 = self.batch_norm2(conv6_2_1)
         sources.append(conv6_2_1)
         for i in range(1,len(pred_last_4)):
-            sources.append( pred_last_4[i] )
+            if i != len(pred_last_4):
+                sources.append( self.last_three_bn[i-1](pred_last_4[i]) )
         #merge conv4_3 downsample conv3_1, upsample fc7,
 
         # apply multibox head to source layers
