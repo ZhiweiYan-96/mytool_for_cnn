@@ -80,7 +80,7 @@ class SSD(nn.Module):
         self.batch_norm9 = nn.BatchNorm2d(256)
         self.batch_norm10 = nn.BatchNorm2d(256)
         self.batch_norm11 = nn.BatchNorm2d(256)
-        self.se3 = AttentionModule(256*3,(5,5),(3,3),(1,1))
+        #self.se3 = AttentionModule(256*3,(5,5),(3,3),(1,1))
         self.scale3 = ScaleLayer(init_value=1)
 
         self.down_conv7_2_conv = nn.Conv2d(256,256,stride=1,kernel_size=3,padding=1)
@@ -222,9 +222,11 @@ class SSD(nn.Module):
         conv8_2_up = self.up_conv8_2( conv8_2 )
         conv8_2_up = self.up_conv8_2_conv( conv8_2_up )
         conv8_2_up = self.batch_norm11(conv8_2_up)
+        '''
         conv7_2_1 =torch.cat( [conv7_2_bn , conv8_2_up, conv6_2_down],dim=1)
         conv7_2_1 = self.se3( conv7_2_1 )
         [conv7_2_bn, conv8_2_Up, conv6_2_down ] = torch.split(conv7_2_1,split_size_or_sections=256,dim=1)
+        '''
         conv7_2_1 = conv7_2_bn + conv8_2_up + conv6_2_down
         conv7_2_1 = self.scale3( conv7_2_1 )
         sources.append( conv7_2_1 )
