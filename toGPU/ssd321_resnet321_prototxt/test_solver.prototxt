@@ -1,0 +1,26 @@
+train_net: "models/ResNet-101/VOC0712/SSD_VOC07_321x321/train.prototxt"
+test_net: "models/ResNet-101/VOC0712/SSD_VOC07_321x321/test.prototxt"
+test_iter: 1238
+test_interval: 10000
+base_lr: 0.0010000000475
+display: 10
+max_iter: 0
+lr_policy: "multistep"
+gamma: 0.10000000149
+momentum: 0.899999976158
+weight_decay: 0.000500000023749
+snapshot: 20000
+snapshot_prefix: "models/ResNet-101/VOC0712/SSD_VOC07_321x321/ResNet-101_VOC0712_SSD_VOC07_321x321"
+solver_mode: GPU
+device_id: 0
+debug_info: false
+snapshot_after_train: false
+test_initialization: true
+average_loss: 10
+stepvalue: 40000
+stepvalue: 60000
+iter_size: 1
+type: "SGD"
+eval_type: "detection"
+ap_version: "11point"
+

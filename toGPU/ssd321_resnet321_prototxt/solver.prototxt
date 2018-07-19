@@ -1,0 +1,20 @@
+train_net: "models/ResNet-101/VOC0712/SSD_VOC07_321x321/train.prototxt"
+base_lr: 0.0010000000475
+display: 10
+max_iter: 80000
+lr_policy: "multistep"
+gamma: 0.10000000149
+momentum: 0.899999976158
+weight_decay: 0.000500000023749
+snapshot: 20000
+snapshot_prefix: "models/ResNet-101/VOC0712/SSD_VOC07_321x321/ResNet-101_VOC0712_SSD_VOC07_321x321"
+solver_mode: GPU
+device_id: 0
+debug_info: false
+snapshot_after_train: true
+average_loss: 10
+stepvalue: 40000
+stepvalue: 60000
+iter_size: 1
+type: "SGD"
+
